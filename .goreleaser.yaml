@@ -1,0 +1,97 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: httpechoes
+    main: ./cmd/httpechoes
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm
+      - arm64
+      - '386'
+      - ppc64le
+    goarm:
+      - '7'
+
+archives:
+  - formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+dockers:
+  - id: httpechoes-amd64
+    image_templates:
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-amd64
+    dockerfile: ./Dockerfile
+    use: buildx
+    goos: linux
+    goarch: amd64
+
+  - id: httpechoes-armv7
+    image_templates:
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-armv7
+    dockerfile: ./Dockerfile
+    use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 7
+
+  - id: httpechoes-arm64
+    image_templates:
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-arm64
+    dockerfile: ./Dockerfile
+    use: buildx
+    goos: linux
+    goarch: arm64
+
+  - id: httpechoes-386
+    image_templates:
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-386
+    dockerfile: ./Dockerfile
+    use: buildx
+    goos: linux
+    goarch: '386'
+
+  - id: httpechoes-ppc64le
+    image_templates:
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-ppc64le
+    dockerfile: ./Dockerfile
+    use: buildx
+    goos: linux
+    goarch: ppc64le
+
+docker_manifests:
+  - name_template: ghcr.io/gulien/http-echoes:{{ .Version }}
+    image_templates:
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-amd64
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-armv7
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-arm64
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-386
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-ppc64le
+
+  - name_template: ghcr.io/gulien/http-echoes:latest
+    image_templates:
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-amd64
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-armv7
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-arm64
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-386
+      - ghcr.io/gulien/http-echoes:{{ .Version }}-ppc64le
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"

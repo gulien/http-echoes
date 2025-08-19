@@ -6,9 +6,8 @@ help: ## Show the help
 run: ## Run the project
 	go run cmd/httpechoes/main.go
 
-.PHONY: test-unit
-test-unit: ## Run unit tests
-	go test -race ./...
+snapshot: ## Snapshot release with GoReleaser
+	goreleaser build --snapshot --clean
 
 .PHONY: lint
 lint: ## Lint Golang codebase
